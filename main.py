@@ -6,21 +6,6 @@ from discord import app_commands
 from flask import Flask
 from threading import Thread
 
-# --- Serveur Flask pour UptimeRobot ---
-app = Flask('')
-
-
-@app.route('/')
-def home():
-    return "Je suis vivant !"
-
-
-def run():
-    app.run(host='0.0.0.0', port=8080)
-
-
-Thread(target=run).start()
-
 # --- Discord Bot ---
 
 # Charger le token depuis les variables d'environnement (Replit Secrets)
