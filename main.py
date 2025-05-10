@@ -1,7 +1,24 @@
 import os
 import discord
 from discord.ext import commands
+from flask import Flask
+from threading import Thread
+import asyncio
 
+# --- Serveur Flask pour UptimeRobot ---
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Je suis vivant !"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
+
+Thread(target=run_flask).start()
+
+# --- Discord Bot ---
 TOKEN = os.environ['TOKEN']
 intents = discord.Intents.default()
 intents.message_content = True
@@ -12,20 +29,16 @@ bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
 async def on_ready():
     print(f"✅ Connecté en tant que {bot.user}")
     await bot.tree.sync()
-    print("📜 Commandes chargées :",
-          [command.name for command in bot.tree.get_commands()])
+    print("📜 Commandes chargées :", [cmd.name for cmd in bot.tree.get_commands()])
 
 async def load_extensions():
     for filename in os.listdir("./commands"):
         if filename.endswith(".py"):
             try:
-                cog_name = f"commands.{filename[:-3]}"
-                await bot.load_extension(cog_name)
+                await bot.load_extension(f"commands.{filename[:-3]}")
                 print(f"✅ {filename} chargé avec succès")
             except Exception as e:
                 print(f"❌ Erreur lors du chargement de {filename}: {e}")
-
-import asyncio
 
 async def main():
     async with bot:
