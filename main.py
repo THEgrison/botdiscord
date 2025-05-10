@@ -46,8 +46,23 @@ async def load_extensions():
                 print(f"❌ Erreur lors du chargement de {filename}: {e}")
 
 
-# Fonction principale
+# Fonction Flask pour empêcher l'instance Railway de dormir
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return 'Bot is running!', 200
+
+def run_flask():
+    app.run(host='0.0.0.0', port=5000)
+
+# Fonction principale pour lancer le bot et Flask
 async def main():
+    # Lancer le serveur Flask dans un thread
+    thread = Thread(target=run_flask)
+    thread.start()
+
+    # Lancer le bot Discord
     async with bot:
         await load_extensions()
         await bot.start(TOKEN)
