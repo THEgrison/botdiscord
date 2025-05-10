@@ -9,15 +9,17 @@ from threading import Thread
 # --- Serveur Flask pour UptimeRobot ---
 app = Flask('')
 
-
+# Route principale qui renvoie un message pour vérifier que le bot est vivant
 @app.route('/')
 def home():
-    return "Je suis vivant !"
+    return "Je suis vivant !"  # Message envoyé pour la vérification d'UptimeRobot
 
+# Fonction pour démarrer le serveur Flask avec Gunicorn
 def run():
     port = int(os.environ.get("PORT", 8080))  # Railway définit cette variable automatiquement
-    app.run(host='0.0.0.0', port=port)
+    # Gunicorn prendra en charge le lancement du serveur
 
+# Lancer Flask dans un thread pour ne pas bloquer l'exécution du bot Discord
 Thread(target=run).start()
 
 # --- Discord Bot ---
