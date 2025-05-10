@@ -67,5 +67,4 @@ if __name__ == "__main__":
     thread.daemon = True  # S'assure que le thread termine lorsque l'application se ferme
     thread.start()
 
-    # Lancer Flask avec Gunicorn
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+# app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Handled by Gunicorn on Railway
