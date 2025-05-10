@@ -1,14 +1,19 @@
-import discord
 import os
-import asyncio
+import discord
 from discord.ext import commands
-from discord import app_commands
 from flask import Flask
-from threading import Thread
+
+# --- Serveur Flask pour UptimeRobot ---
+app = Flask('')
+
+# Route principale qui renvoie un message pour vérifier que le bot est vivant
+@app.route('/')
+def home():
+    return "Je suis vivant !"  # Message envoyé pour la vérification d'UptimeRobot
 
 # --- Discord Bot ---
 
-# Charger le token depuis les variables d'environnement (Replit Secrets)
+# Charger le token depuis les variables d'environnement
 TOKEN = os.environ['TOKEN']
 
 # Définir les intents nécessaires
@@ -18,13 +23,6 @@ intents.message_content = True
 # Initialiser le bot
 bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
 
-
-# Vérification globale : Seuls les administrateurs peuvent exécuter les commandes
-@bot.check
-async def globally_admin_only(ctx):
-    return ctx.author.guild_permissions.administrator
-
-
 # Quand le bot est prêt
 @bot.event
 async def on_ready():
@@ -32,7 +30,6 @@ async def on_ready():
     await bot.tree.sync()
     print("📜 Commandes chargées :",
           [command.name for command in bot.tree.get_commands()])
-
 
 # Charger automatiquement les fichiers de cogs
 async def load_extensions():
@@ -45,13 +42,17 @@ async def load_extensions():
             except Exception as e:
                 print(f"❌ Erreur lors du chargement de {filename}: {e}")
 
-
-# Fonction principale
+# Fonction principale pour démarrer le bot
 async def main():
     async with bot:
         await load_extensions()
         await bot.start(TOKEN)
 
-
 # Lancer le bot
+import asyncio
 asyncio.run(main())
+
+# Lancer Flask dans un thread séparé
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))  # Railway définit cette variable automatiquement
+    app.run(host='0.0.0.0', port=port)  # Flask lancé avec `app.run()` pour le développement
