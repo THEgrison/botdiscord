@@ -6,6 +6,21 @@ from discord import app_commands
 from flask import Flask
 from threading import Thread
 
+# --- Serveur Flask pour UptimeRobot ---
+app = Flask('')
+
+
+@app.route('/')
+def home():
+    return "Je suis vivant !"
+
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+
+Thread(target=run).start()
+
 # --- Discord Bot ---
 
 # Charger le token depuis les variables d'environnement (Replit Secrets)
@@ -18,10 +33,12 @@ intents.message_content = True
 # Initialiser le bot
 bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
 
+
 # Vérification globale : Seuls les administrateurs peuvent exécuter les commandes
 @bot.check
 async def globally_admin_only(ctx):
     return ctx.author.guild_permissions.administrator
+
 
 # Quand le bot est prêt
 @bot.event
@@ -30,6 +47,7 @@ async def on_ready():
     await bot.tree.sync()
     print("📜 Commandes chargées :",
           [command.name for command in bot.tree.get_commands()])
+
 
 # Charger automatiquement les fichiers de cogs
 async def load_extensions():
@@ -42,29 +60,13 @@ async def load_extensions():
             except Exception as e:
                 print(f"❌ Erreur lors du chargement de {filename}: {e}")
 
-# Fonction Flask pour empêcher l'instance Railway de dormir
-app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return 'Bot is running!', 200
-
-# Fonction principale pour lancer le bot et Flask
+# Fonction principale
 async def main():
-    # Lancer le bot Discord
     async with bot:
         await load_extensions()
         await bot.start(TOKEN)
 
-# Lancer le bot dans un thread séparé pour éviter de bloquer le processus Flask
-def run_bot():
-    asyncio.run(main())
 
-# Lancez le bot dans un thread afin de ne pas bloquer le serveur Flask
-if __name__ == "__main__":
-    # Démarrer le thread pour le bot
-    thread = Thread(target=run_bot)
-    thread.daemon = True  # S'assure que le thread termine lorsque l'application se ferme
-    thread.start()
-
-# app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Handled by Gunicorn on Railway
+# Lancer le bot
+asyncio.run(main())
