@@ -2,24 +2,28 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-
-class ClearWarns(commands.Cog):
+class ServerInfo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.warns = bot.get_cog("Warn").warnings
-        self.save = bot.get_cog("Warn").save_warnings
 
-    @app_commands.command(name="clearwarns", description="Supprime tous les avertissements d’un membre")
-    @app_commands.checks.has_permissions(manage_messages=True)
-    async def clearwarns(self, interaction: discord.Interaction, member: discord.Member):
-        if str(member.id) not in self.warns or len(self.warns[str(member.id)]) == 0:
-            await interaction.response.send_message(f"{member.mention} n’a aucun avertissement à supprimer.", ephemeral=True)
-            return
-
-        del self.warns[str(member.id)]
-        self.save()
-        await interaction.response.send_message(f"✅ Tous les avertissements de {member.mention} ont été supprimés.")
-
+    @app_commands.command(name="serverinfo", description="Affiche des informations sur le serveur.")
+    async def serverinfo(self, interaction: discord.Interaction):
+        guild = interaction.guild  # Récupère le serveur (guild)
+        
+        # Préparer les informations à afficher
+        embed = discord.Embed(title=f"Informations sur {guild.name}", color=discord.Color.blue())
+        embed.set_thumbnail(url=guild.icon.url if guild.icon else discord.Embed.Empty)  # Icône du serveur
+        embed.add_field(name="Nom du serveur", value=guild.name, inline=False)
+        embed.add_field(name="ID du serveur", value=guild.id, inline=False)
+        embed.add_field(name="Propriétaire", value=f"{guild.owner}", inline=False)
+        embed.add_field(name="Région", value=guild.region, inline=False)
+        embed.add_field(name="Nombre de membres", value=len(guild.members), inline=False)
+        embed.add_field(name="Nombre de salons", value=len(guild.channels), inline=False)
+        embed.add_field(name="Nombre de rôles", value=len(guild.roles), inline=False)
+        embed.add_field(name="Date de création", value=guild.created_at.strftime("%d %b %Y"), inline=False)
+        
+        # Envoi du message
+        await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
-    await bot.add_cog(ClearWarns(bot))
+    await bot.add_cog(ServerInfo(bot))
