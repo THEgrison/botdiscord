@@ -10,6 +10,12 @@ class Warns(commands.Cog):
         self.file_path = "warns.json"
         self.warnings = self.load_warnings()
 
+        # Groupe de commandes "warn"
+        self.warn_group = app_commands.Group(name="warn", description="Gérer les avertissements")
+        self.warn_group.command(name="add", description="Avertit un membre avec une raison")(self.add)
+        self.warn_group.command(name="list", description="Affiche les avertissements d’un membre")(self.list)
+        self.warn_group.command(name="clear", description="Supprime tous les avertissements d’un membre")(self.clear)
+
     def load_warnings(self):
         if os.path.exists(self.file_path):
             with open(self.file_path, "r", encoding="utf-8") as f:
@@ -20,10 +26,7 @@ class Warns(commands.Cog):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.warnings, f, indent=4)
 
-    warn_group = app_commands.Group(name="warn", description="Gérer les avertissements")
-
-    @warn_group.command(name="add", description="Avertit un membre avec une raison")
-    @app_commands.checks.has_permissions(manage_messages=True)
+    # --- Commande: /warn add ---
     async def add(self, interaction: discord.Interaction, member: discord.Member, reason: str):
         if member.id == interaction.user.id:
             await interaction.response.send_message("❌ Tu ne peux pas t'avertir toi-même.", ephemeral=True)
@@ -53,8 +56,7 @@ class Warns(commands.Cog):
         except discord.Forbidden:
             pass
 
-    @warn_group.command(name="list", description="Affiche les avertissements d’un membre")
-    @app_commands.checks.has_permissions(manage_messages=True)
+    # --- Commande: /warn list ---
     async def list(self, interaction: discord.Interaction, member: discord.Member):
         warns = self.warnings.get(str(member.id))
         if not warns:
@@ -75,8 +77,7 @@ class Warns(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    @warn_group.command(name="clear", description="Supprime tous les avertissements d’un membre")
-    @app_commands.checks.has_permissions(manage_messages=True)
+    # --- Commande: /warn clear ---
     async def clear(self, interaction: discord.Interaction, member: discord.Member):
         if str(member.id) not in self.warnings or not self.warnings[str(member.id)]:
             await interaction.response.send_message(f"{member.mention} n’a aucun avertissement à supprimer.", ephemeral=True)
