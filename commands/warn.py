@@ -14,7 +14,10 @@ class Warn(commands.Cog):
     def load_warnings(self):
         if os.path.exists(self.file_path):
             with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
+                try:
+                    return json.load(f)
+                except json.JSONDecodeError:
+                    return {}  # Si le fichier est vide ou corrompu, on renvoie un dictionnaire vide
         return {}
 
     def save_warnings(self):
