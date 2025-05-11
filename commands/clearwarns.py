@@ -18,7 +18,6 @@ class ClearWarns(commands.Cog):
 
         del self.warns[str(member.id)]
         self.save()
-
         await interaction.response.send_message(f"✅ Tous les avertissements de {member.mention} ont été supprimés.")
 
 
