@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime
+import asyncio  # Pour gérer les délais
 
 class ServerInfo(commands.Cog):
     def __init__(self, bot):
@@ -10,7 +11,7 @@ class ServerInfo(commands.Cog):
     @app_commands.command(name="serverinfo", description="Affiche des informations détaillées sur le serveur")
     async def serverinfo(self, interaction: discord.Interaction):
         guild = interaction.guild
-        print(f"Commande /serverinfo exécutée sur le serveur {guild.name} ({guild.id})")  # Log de début d'exécution
+        print(f"Commande /serverinfo exécutée sur le serveur {guild.name} ({guild.id})")
 
         try:
             embed = discord.Embed(
@@ -20,20 +21,22 @@ class ServerInfo(commands.Cog):
             )
 
             # Informations générales
-            print("Récupération des informations générales...")  # Log pour suivre l'exécution
+            print("Récupération des informations générales...")
             embed.add_field(name="📅 Création du serveur", value=guild.created_at.strftime("%d %B %Y à %H:%M:%S"), inline=False)
             embed.add_field(name="👑 Propriétaire", value=guild.owner.mention, inline=True)
             embed.add_field(name="🆔 ID du serveur", value=guild.id, inline=True)
 
-            # Statistiques membres
-            print("Récupération des statistiques membres...")  # Log pour suivre l'exécution
+            # Statistiques membres avec un délai
+            print("Récupération des statistiques membres...")
+            await asyncio.sleep(0.5)  # Ajout d'un petit délai pour éviter la surcharge
             total_members = guild.member_count
             humans = len([m for m in guild.members if not m.bot])
             bots = total_members - humans
             embed.add_field(name="👥 Membres", value=f"Total : {total_members}\n👤 Humains : {humans}\n🤖 Bots : {bots}", inline=False)
 
             # Statistiques de salons
-            print("Récupération des salons...")  # Log pour suivre l'exécution
+            print("Récupération des salons...")
+            await asyncio.sleep(0.5)  # Délai supplémentaire pour les salons si nécessaire
             text_channels = len(guild.text_channels)
             voice_channels = len(guild.voice_channels)
             categories = len(guild.categories)
@@ -61,12 +64,12 @@ class ServerInfo(commands.Cog):
             embed.set_footer(text=f"Demandé par {interaction.user}", icon_url=interaction.user.display_avatar.url)
 
             # Envoie du message
-            print(f"Envoi des informations du serveur...")  # Log avant l'envoi
+            print("Envoi des informations du serveur...")
             await interaction.response.send_message(embed=embed)
-            print("Commande /serverinfo terminée avec succès.")  # Log de fin d'exécution
+            print("Commande /serverinfo terminée avec succès.")
 
         except discord.DiscordException as e:
-            print(f"Erreur lors de la récupération des informations du serveur : {e}")  # Log d'erreur
+            print(f"Erreur lors de la récupération des informations du serveur : {e}")
             await interaction.response.send_message(f"❌ Une erreur s'est produite lors de la récupération des informations du serveur : {e}")
 
 async def setup(bot):
