@@ -45,4 +45,8 @@ async def main():
         await load_extensions()
         await bot.start(TOKEN)
 
+await bot.load_extension("commands.warn")
+await bot.load_extension("commands.clearwarns")
+await bot.load_extension("commands.warnings")
+
 asyncio.run(main())
