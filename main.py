@@ -32,7 +32,7 @@ async def on_ready():
     print("📜 Commandes chargées :", [cmd.name for cmd in bot.tree.get_commands()])
 
 async def load_extensions():
-    priority = ["warn", "clearwarns", "warnings"]  # Liste priorisée
+    priority = ["warns"]  # Liste priorisée
 
     for name in priority:
         path = f"commands.{name}"
