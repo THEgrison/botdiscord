@@ -5,7 +5,7 @@ from discord import app_commands
 class ClearWarns(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.warns = bot.get_cog("Warn").warnings  # Accéder aux avertissements chargés depuis le cog Warn
+        self.warns = bot.get_cog("Warn").warnings  # Récupérer les avertissements depuis le cog "Warn"
         self.save = bot.get_cog("Warn").save_warnings  # Sauvegarder les avertissements après suppression
 
     @app_commands.command(name="clearwarns", description="Supprime tous les avertissements d’un membre")
