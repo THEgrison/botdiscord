@@ -32,10 +32,22 @@ async def on_ready():
     print("📜 Commandes chargées :", [cmd.name for cmd in bot.tree.get_commands()])
 
 async def load_extensions():
+    priority = ["warn", "clearwarns", "warnings"]  # Liste priorisée
+
+    for name in priority:
+        path = f"commands.{name}"
+        try:
+            await bot.load_extension(path)
+            print(f"✅ {name}.py chargé avec succès")
+        except Exception as e:
+            print(f"❌ Erreur lors du chargement de {name}.py: {e}")
+
+    # Charger le reste (les fichiers non listés)
     for filename in os.listdir("./commands"):
-        if filename.endswith(".py"):
+        mod_name = filename[:-3]
+        if filename.endswith(".py") and mod_name not in priority:
             try:
-                await bot.load_extension(f"commands.{filename[:-3]}")
+                await bot.load_extension(f"commands.{mod_name}")
                 print(f"✅ {filename} chargé avec succès")
             except Exception as e:
                 print(f"❌ Erreur lors du chargement de {filename}: {e}")
