@@ -10,7 +10,6 @@ class Warns(commands.Cog):
         self.file_path = "warns.json"
         self.warnings = self.load_warnings()
 
-        # Groupe de commandes "warn"
         self.warn_group = app_commands.Group(name="warn", description="Gérer les avertissements")
         self.warn_group.command(name="add", description="Avertit un membre avec une raison")(self.add)
         self.warn_group.command(name="list", description="Affiche les avertissements d’un membre")(self.list)
@@ -26,7 +25,7 @@ class Warns(commands.Cog):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.warnings, f, indent=4)
 
-    # --- Commande: /warn add ---
+    # --- /warn add ---
     async def add(self, interaction: discord.Interaction, member: discord.Member, reason: str):
         if member.id == interaction.user.id:
             await interaction.response.send_message("❌ Tu ne peux pas t'avertir toi-même.", ephemeral=True)
@@ -56,7 +55,7 @@ class Warns(commands.Cog):
         except discord.Forbidden:
             pass
 
-    # --- Commande: /warn list ---
+    # --- /warn list ---
     async def list(self, interaction: discord.Interaction, member: discord.Member):
         warns = self.warnings.get(str(member.id))
         if not warns:
@@ -75,9 +74,10 @@ class Warns(commands.Cog):
                 inline=False
             )
 
-        await interaction.response.send_message(embed=embed)
+        view = DeleteWarningView(self, member.id, warns, interaction.user)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-    # --- Commande: /warn clear ---
+    # --- /warn clear ---
     async def clear(self, interaction: discord.Interaction, member: discord.Member):
         if str(member.id) not in self.warnings or not self.warnings[str(member.id)]:
             await interaction.response.send_message(f"{member.mention} n’a aucun avertissement à supprimer.", ephemeral=True)
@@ -90,6 +90,40 @@ class Warns(commands.Cog):
 
     async def cog_load(self):
         self.bot.tree.add_command(self.warn_group)
+
+
+class DeleteWarningView(discord.ui.View):
+    def __init__(self, cog: Warns, user_id: int, warnings: list, moderator: discord.User):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.user_id = user_id
+        self.moderator = moderator
+
+        for i in range(len(warnings)):
+            self.add_item(DeleteButton(i + 1, self))
+
+
+class DeleteButton(discord.ui.Button):
+    def __init__(self, index: int, view: DeleteWarningView):
+        super().__init__(label=f"Supprimer ⚠️{index}", style=discord.ButtonStyle.danger, custom_id=str(index))
+        self.index = index - 1
+        self.view_obj = view
+
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.user.id != self.view_obj.moderator.id:
+            await interaction.response.send_message("❌ Seul l'auteur de la commande peut supprimer un avertissement.", ephemeral=True)
+            return
+
+        user_id_str = str(self.view_obj.user_id)
+        try:
+            del self.view_obj.cog.warnings[user_id_str][self.index]
+            if not self.view_obj.cog.warnings[user_id_str]:
+                del self.view_obj.cog.warnings[user_id_str]
+            self.view_obj.cog.save_warnings()
+            await interaction.response.send_message(f"✅ Avertissement n°{self.index + 1} supprimé.", ephemeral=True)
+        except IndexError:
+            await interaction.response.send_message("❌ Cet avertissement n'existe plus.", ephemeral=True)
+
 
 async def setup(bot):
     await bot.add_cog(Warns(bot))
