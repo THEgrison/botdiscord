@@ -8,14 +8,14 @@ class AutoBanCheck(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        if "boa" in member.name.lower():
+        if "BOA" in member.name.lower():
             channel = self.bot.get_channel(self.channel_id)
             if not channel:
                 return
 
             embed = discord.Embed(
                 title="🛑 Détection automatique",
-                description=f"Le membre {member.mention} (`{member.name}`) contient 'boa' dans son nom.",
+                description=f"Le membre {member.mention} (`{member.name}`) contient 'BOA' dans son nom.",
                 color=discord.Color.orange()
             )
             embed.set_footer(text="Souhaitez-vous le bannir ?")
@@ -31,7 +31,7 @@ class BanConfirmationView(discord.ui.View):
     @discord.ui.button(label="✅ Bannir", style=discord.ButtonStyle.danger)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         try:
-            await self.member.ban(reason="Nom contient 'boa'. Bannissement confirmé.")
+            await self.member.ban(reason="Nom contient 'BOA'. Bannissement confirmé.")
             await interaction.response.send_message(f"{self.member} a été **banni**.", ephemeral=True)
         except Exception as e:
             await interaction.response.send_message(f"Erreur : {e}", ephemeral=True)
