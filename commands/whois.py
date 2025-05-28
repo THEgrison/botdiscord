@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from datetime import timezone
 
 class Whois(commands.Cog):
     def __init__(self, bot):
@@ -38,6 +37,9 @@ class Whois(commands.Cog):
             embed.add_field(name="Statut", value="L'utilisateur n'est pas sur ce serveur.", inline=False)
 
         await interaction.response.send_message(embed=embed)
+
+    async def cog_load(self):
+        self.bot.tree.add_command(self.whois)  # 👈 enregistrement explicite
 
 async def setup(bot):
     await bot.add_cog(Whois(bot))
