@@ -1,60 +1,45 @@
-import os
 import discord
 from discord.ext import commands
-from flask import Flask
-from threading import Thread
-import asyncio
+from discord import app_commands
 
-# --- Serveur Flask pour UptimeRobot ---
-app = Flask(__name__)
+class Whois(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-@app.route('/')
-def home():
-    return "Je suis vivant !"
+    @app_commands.command(name="whois", description="Affiche les informations d'un utilisateur.")
+    @app_commands.describe(user="Le membre à inspecter")
+    async def whois(self, interaction: discord.Interaction, user: discord.User):
+        member = interaction.guild.get_member(user.id)
 
-def run_flask():
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+        embed = discord.Embed(title=f"Informations sur {user.name}", color=discord.Color.blue())
+        embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.add_field(name="Tag", value=f"`{user}`", inline=True)
+        embed.add_field(name="ID", value=f"`{user.id}`", inline=True)
+        embed.add_field(
+            name="Compte créé le",
+            value=discord.utils.format_dt(user.created_at, style="F"),
+            inline=False
+        )
 
-Thread(target=run_flask).start()
+        if member:
+            embed.add_field(
+                name="Rejoint le serveur",
+                value=discord.utils.format_dt(member.joined_at, style="F"),
+                inline=False
+            )
+            roles = [role.mention for role in member.roles[1:]]  # ignore @everyone
+            embed.add_field(
+                name=f"Rôles ({len(roles)})",
+                value=", ".join(roles) if roles else "Aucun",
+                inline=False
+            )
+        else:
+            embed.add_field(name="Statut", value="L'utilisateur n'est pas sur ce serveur.", inline=False)
 
-# --- Discord Bot ---
-TOKEN = os.environ['TOKEN']
-intents = discord.Intents.default()
-intents.message_content = True
+        await interaction.response.send_message(embed=embed)
 
-bot = commands.Bot(command_prefix="/", intents=intents, help_command=None)
+    async def cog_load(self):
+        self.bot.tree.add_command(self.whois)  # 👈 enregistrement explicite
 
-@bot.event
-async def on_ready():
-    print(f"✅ Connecté en tant que {bot.user}")
-    await bot.tree.sync()
-    print("📜 Commandes chargées :", [cmd.name for cmd in bot.tree.get_commands()])
-
-async def load_extensions():
-    priority = ["warns"]  # Liste priorisée
-
-    for name in priority:
-        path = f"commands.{name}"
-        try:
-            await bot.load_extension(path)
-            print(f"✅ {name}.py chargé avec succès")
-        except Exception as e:
-            print(f"❌ Erreur lors du chargement de {name}.py: {e}")
-
-    # Charger le reste (les fichiers non listés)
-    for filename in os.listdir("./commands"):
-        mod_name = filename[:-3]
-        if filename.endswith(".py") and mod_name not in priority:
-            try:
-                await bot.load_extension(f"commands.{mod_name}")
-                print(f"✅ {filename} chargé avec succès")
-            except Exception as e:
-                print(f"❌ Erreur lors du chargement de {filename}: {e}")
-
-async def main():
-    async with bot:
-        await load_extensions()
-        await bot.start(TOKEN)
-
-asyncio.run(main())
+async def setup(bot):
+    await bot.add_cog(Whois(bot))
