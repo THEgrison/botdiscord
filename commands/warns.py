@@ -27,6 +27,10 @@ class Warns(commands.Cog):
 
     # --- /warn add ---
     async def add(self, interaction: discord.Interaction, member: discord.Member, reason: str):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Tu dois être administrateur pour utiliser cette commande.", ephemeral=True)
+            return
+
         if member.id == interaction.user.id:
             await interaction.response.send_message("❌ Tu ne peux pas t'avertir toi-même.", ephemeral=True)
             return
@@ -57,6 +61,10 @@ class Warns(commands.Cog):
 
     # --- /warn list ---
     async def list(self, interaction: discord.Interaction, member: discord.Member):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Tu dois être administrateur pour utiliser cette commande.", ephemeral=True)
+            return
+
         warns = self.warnings.get(str(member.id))
         if not warns:
             await interaction.response.send_message(f"✅ {member.mention} n'a aucun avertissement.", ephemeral=True)
@@ -79,6 +87,10 @@ class Warns(commands.Cog):
 
     # --- /warn clear ---
     async def clear(self, interaction: discord.Interaction, member: discord.Member):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("❌ Tu dois être administrateur pour utiliser cette commande.", ephemeral=True)
+            return
+
         if str(member.id) not in self.warnings or not self.warnings[str(member.id)]:
             await interaction.response.send_message(f"{member.mention} n’a aucun avertissement à supprimer.", ephemeral=True)
             return
