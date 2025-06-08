@@ -4,7 +4,7 @@ from discord.ext import commands
 class RestoreMessage(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.channel_id = 1370525322231021588  # Salon à surveiller
+        self.channel_id = 1106114283231776790  # Salon à surveiller
         self.author_id = 714114719014715412    # Ton ID
 
     @commands.Cog.listener()
