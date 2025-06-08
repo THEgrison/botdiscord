@@ -13,7 +13,7 @@ class Whois(commands.Cog):
             title=f"Informations sur {user}",
             color=discord.Color.blue()
         )
-        embed.set_thumbnail(url=user.avatar.url if user.avatar else user.default_avatar.url)
+        embed.set_thumbnail(url=user.display_avatar.url)
         embed.add_field(name="Tag", value=f"`{user}`", inline=True)
         embed.add_field(name="ID", value=f"`{user.id}`", inline=True)
         embed.add_field(
