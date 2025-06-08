@@ -4,7 +4,7 @@ from discord.ext import commands
 class RestoreMessage(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.channel_id = 1106114283231776790  # Remplace par l'ID de ton salon
+        self.channel_id = 1370525322231021588  # Remplace par l'ID de ton salon
         self.author_id = 714114719014715412  # Remplace par TON ID utilisateur
 
     @commands.Cog.listener()
