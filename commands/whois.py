@@ -36,9 +36,5 @@ class Whois(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    async def cog_load(self):
-        self.bot.tree.add_command(self.whois)
-
-
 async def setup(bot):
     await bot.add_cog(Whois(bot))
